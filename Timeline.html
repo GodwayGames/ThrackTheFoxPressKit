@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vertical Timeline with Dynamic Spacing</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f9;
+    }
+
+    .timeline-container {
+      width: 90%;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      text-align: left;
+    }
+
+    .timeline {
+      position: relative;
+      border-left: 4px solid #007bff;
+      padding: 10px;
+      margin: 20px 0;
+    }
+
+    .event {
+      position: relative;
+      padding: 10px 15px;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      margin-left: 20px;
+      cursor: pointer;
+    }
+
+    .event::before {
+      content: '';
+      position: absolute;
+      top: 10px;
+      left: -12px;
+      width: 12px;
+      height: 12px;
+      background-color: #007bff;
+      border: 2px solid #fff;
+      border-radius: 50%;
+    }
+
+    .event:hover {
+      background-color: #eef7ff;
+      border-color: #007bff;
+    }
+
+    .event:hover::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      top: -30px;
+      left: calc(100% + 10px);
+      background-color: #333;
+      color: #fff;
+      padding: 5px 10px;
+      font-size: 12px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    .event:hover::before {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="timeline-container">
+    <div class="timeline">
+      <!-- Dynamic Events will be added here by JavaScript -->
+    </div>
+  </div>
+
+  <script>
+    const events = [
+      { date: new Date(2023, 0.0, 1), label: 'Event 0: 02/16/2023 Begin considerations and planning phaze.' },
+      { date: new Date(2024, 1.0, 2), label: 'Event 1: 03/27/2024 Pre-Alpha Developmentment stage began.' },
+	  { date: new Date(2024, 2.0, 3), label: 'Event 2: 08/02/2024 Enter Alpha-Developmentment Stage.' },
+	  { date: new Date(2024, 3.0, 4), label: 'Event 3: 08/09/2024 Thrack-The-Fox launched its devlog.' },	  
+      { date: new Date(2024, 3.5, 5), label: 'Event 4: 10/09/2024 Thrack-The-Fox was listed to steam.' },	  
+      { date: new Date(2024, 5.0, 6), label: 'Event 5: 01/03/2025 Thrack-The-Fox Interview with an IndieGameNews website.' },	  
+
+	  
+    ];
+
+    const timeline = document.querySelector('.timeline');
+    let previousDate = events[0].date;
+
+    events.forEach(event => {
+      // Calculate the time difference in months
+      const diffMonths = (event.date - previousDate) / (1000 * 60 * 60 * 24 * 30);
+      previousDate = event.date;
+
+      // Create the event element
+      const eventElement = document.createElement('div');
+      eventElement.className = 'event';
+      eventElement.textContent = event.label.split(':')[1].trim(); // Display only the event name
+      eventElement.setAttribute('data-tooltip', event.label);
+      eventElement.style.marginTop = `${diffMonths * 20}px`; // Adjust multiplier for spacing
+      timeline.appendChild(eventElement);
+    });
+  </script>
+</body>
+</html>

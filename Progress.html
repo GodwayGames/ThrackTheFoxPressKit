@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Progress with Margin of Error</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+			//align-items: flex-start; /* Aligns content from the top */
+            height: 100vh;
+            margin: 5;
+			position: relative;
+			top: 20px;
+            background-color: #f4f4f4;
+            flex-direction: column;
+			min-height: 100vh;
+			overflow-y: auto;
+        }
+
+        .container {
+            width: 70%;
+            max-width: 800px;
+        }
+
+        .bar {
+            width: 100%;
+            height: 30px;
+            background-color: #ddd;
+            margin: 10px 0;
+            border-radius: 5px;
+            position: relative;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background-color: #4caf50;
+            border-radius: 5px;
+            text-align: center;
+            color: white;
+            font-weight: bold;
+            line-height: 30px;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .bar-error {
+            height: 100%;
+            background-color: #f44336;
+            border-radius: 5px;
+            position: absolute;
+            top: 0;
+        }
+
+        .bar-label {
+            position: absolute;
+            top: 0;
+            left: 10px;
+            color: #333;
+        }
+
+        /* Style for the expandable section */
+        .expandable {
+            cursor: pointer;
+            margin-left: 10px;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .task-list {
+            display: none;
+            margin-top: 10px;
+            padding-left: 20px;
+        }
+
+        .task {
+            margin-bottom: 5px;
+        }
+
+        .task-description {
+            color: #555;
+            font-size: 0.9em;
+        }
+
+        .arrow {
+            margin-left: 10px;
+            transform: rotate(0deg);
+            transition: transform 0.3s;
+        }
+
+        .arrow.open {
+            transform: rotate(90deg);
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container" id="taskContainer">
+        <!-- Task sections will be dynamically generated here -->
+    </div>
+	
+    <script>
+        // Data (replacing hardcoded data)
+        const taskData = {
+            animation: {
+                estimation: 15,
+                extras: 6,
+                tasks: [
+                    { name: "Primary Level 1", progress:  90, description: "Starter Hub World" },
+                    { name: "Primary Level 2", progress:  70, description: "Main Hub Area Connection to the rest of the game." },
+                    { name: "Primary Level 3", progress:  45, description: "one of the most important game areas." },
+                    { name: "Primary Level 4", progress:  60, description: "Entry Point Between Other Areas" },
+                    { name: "Primary Level 5", progress:  75, description: "Jungle" },
+                    { name: "Primary Level 6", progress:  70, description: "EntryPoint" },
+                    { name: "Primary Level 7", progress:  55, description: "Beach" },
+                    { name: "Primary Level 8", progress:  30, description: "a Boss battle aren area" },
+                    { name: "Primary Level 9", progress:  85, description: "important area with a nice skybox" },
+                    { name: "Primary Level 10", progress: 90, description: "volcanic/hot" },
+                    { name: "Primary Level 11", progress: 60, description: "chaos" },
+                    { name: "Primary Level 12", progress: 40, description: "Most Important area in the game" },
+                    { name: "Primary Level 13", progress: 35, description: "Secondary Village Area" },
+                    { name: "Primary Level 14", progress: 80, description: "Swamp Location" },					
+                    { name: "Subworld       1", progress: 15, description: "Starting Location" },
+                    { name: "Subworld       2", progress:  2, description: "sadly, may be scrapped" },
+                    { name: "Subworld       3", progress: 30, description: "leprechauns" }						
+                ]
+            },
+            physics: {
+                estimation: 5,
+                extras: 3,
+                tasks: [
+                    { name: "Physics1", progress: 100, description: "Implemented basic Controls Scheme" },
+                    { name: "Physics2", progress:  2, description: "Implentation of Advanced physics buffers" },
+                    { name: "Combat 1", progress: 90, description: "Combat Reciever integration" },
+                    { name: "Combat 2", progress:  5, description: "Combat expressiong integration" },
+                    { name: "Controls 1", progress: 95, description: "controllers integration." },
+                    { name: "Controls 2", progress: 5, description: "secondary controller mappings." },	
+                    { name: "Cameras", progress: 35, description: "Advanced camera working" },						
+                ]
+            },
+            Music: {
+                estimation: 16,
+                extras: 4,
+                tasks: [
+                    { name: "Track 1", progress: 100, description: "Demo Track From Godway Games <Franco Beceio>" },
+                    { name: "Track 2", progress: 100, description: "Demo Track From Godway Games <Franco Beceio>" },
+                    { name: "Track 3", progress: 100, description: "Demo Track From Godway Games <Franco Beceio>" },
+                    { name: "Track 4", progress: 100, scrapped: true, description: "Used only in a marketing demo <Scrapped>" }
+                ]
+            },
+            InterviewsAndArticles: {
+                estimation: 4,
+                extras: 4,
+                tasks: [
+                    { name: "Press Release", progress: 100, description: "This Press Release." },					
+                    { name: "Devlog", progress: 100, description: "Devlogs https://tpsg.itch.io/thrack/devlog/713073/big-things-are-coming" },
+                    { name: "Steam", progress: 50, description: "Thrack is available to be wishlisted on steam https://store.steampowered.com/app/3249500/Thrack_The_Fox/" },					
+                    { name: "Interview 1: IndieGameNews", progress: 100, description: "Interview Done By GodwayGames https://indiegamenews.github.io/IndieGameNews/?Page=1" },
+                ]
+            }			
+        };
+
+        // Unified calculation function
+        function calculateProgress(tasks, estimation, extras) {
+            const totalTasks = estimation + extras;
+            let totalProgress = 0;
+
+            tasks.forEach(task => {
+                totalProgress += (task.progress * 0.01);
+            });
+
+            const completedProgress = (totalProgress / totalTasks) * 100;
+            const marginError = (extras / totalTasks) * 100;
+
+            return {
+                completedProgress,
+                marginError,
+            };
+        }
+
+        // Update progress bar function
+        function updateProgressBar(barId, fillId, errorId, progress, errorMargin) {
+            const fill = document.getElementById(fillId);
+            const error = document.getElementById(errorId);
+
+            fill.style.width = `${progress}%`;
+            error.style.width = `${errorMargin}%`;
+            error.style.left = `${progress}%`;
+
+            fill.innerText = `${Math.round(progress)}% Complete`;
+        }
+
+        // Generate task list
+        function generateTaskList(tasks, taskContainerId) {
+            const taskContainer = document.getElementById(taskContainerId);
+            taskContainer.innerHTML = '';
+
+            tasks.forEach(task => {
+                const taskDiv = document.createElement('div');
+                taskDiv.classList.add('task');
+
+                const taskName = document.createElement('span');
+                taskName.textContent = task.name + ': ' + task.progress + '%';
+                taskDiv.appendChild(taskName);
+
+                const taskDesc = document.createElement('div');
+                taskDesc.classList.add('task-description');
+                taskDesc.textContent = task.description;
+                taskDiv.appendChild(taskDesc);
+
+                taskContainer.appendChild(taskDiv);
+            });
+        }
+
+        // Toggle task visibility
+        function toggleTasks(taskId) {
+            const taskList = document.getElementById(taskId);
+            const arrow = document.getElementById(`${taskId}Arrow`);
+            taskList.style.display = (taskList.style.display === 'none' || taskList.style.display === '') ? 'block' : 'none';
+            arrow.classList.toggle('open');
+        }
+
+        // Dynamically generate task sections based on the taskData
+        function generateTaskSections() {
+            Object.keys(taskData).forEach(category => {
+                const categoryData = taskData[category];
+                const categoryContainer = document.createElement('div');
+                
+                // Create a progress bar for the category
+                const barDiv = document.createElement('div');
+                barDiv.classList.add('bar');
+                const fillDiv = document.createElement('div');
+                fillDiv.classList.add('bar-fill');
+                fillDiv.id = `${category}Fill`;
+                fillDiv.innerText = category.charAt(0).toUpperCase() + category.slice(1);
+                const errorDiv = document.createElement('div');
+                errorDiv.classList.add('bar-error');
+                errorDiv.id = `${category}Error`;
+                barDiv.appendChild(fillDiv);
+                barDiv.appendChild(errorDiv);
+
+                categoryContainer.appendChild(barDiv);
+
+                // Create expandable task list for the category
+                const expandableSpan = document.createElement('span');
+                expandableSpan.classList.add('expandable');
+                expandableSpan.setAttribute('onclick', `toggleTasks('${category}Tasks')`);
+                expandableSpan.innerText = 'Show Tasks ';
+                const arrowSpan = document.createElement('span');
+                arrowSpan.classList.add('arrow');
+                arrowSpan.id = `${category}Arrow`;
+                arrowSpan.innerText = '▶';
+                expandableSpan.appendChild(arrowSpan);
+
+                categoryContainer.appendChild(expandableSpan);
+
+                const taskListDiv = document.createElement('div');
+                taskListDiv.classList.add('task-list');
+                taskListDiv.id = `${category}Tasks`;
+                categoryContainer.appendChild(taskListDiv);
+
+                // Add the category section to the main container
+                document.getElementById('taskContainer').appendChild(categoryContainer);
+
+                // Calculate and update the progress bar for this category
+                const progress = calculateProgress(categoryData.tasks, categoryData.estimation, categoryData.extras);
+                updateProgressBar(`${category}Bar`, `${category}Fill`, `${category}Error`, progress.completedProgress, progress.marginError);
+
+                // Generate task list dynamically
+                generateTaskList(categoryData.tasks, `${category}Tasks`);
+            });
+        }
+		
+		function HideAll() {
+			Object.keys(taskData).forEach(category => {
+				const taskList = document.getElementById(`${category}Tasks`);
+				const arrow = document.getElementById(`${category}Arrow`);
+				
+				// Hide the task list and reset the arrow icon
+				taskList.style.display = 'none';
+				arrow.classList.remove('open');
+			});
+		}		
+        // Generate the task sections on page load
+        generateTaskSections();
+    </script>
+	<button onclick="HideAll()">Hide All</button>
+
+</body>
+</html>
