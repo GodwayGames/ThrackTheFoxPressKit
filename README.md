@@ -5,3 +5,4 @@
 
 - [Download Full Press Kit (ZIP)](https://github.com/GodwayGames/ThrackTheFoxPressKit.git)
 
+[![Download ZIP](https://img.shields.io/badge/Download-ZIP-blue?logo=github)](https://github.com/GodwayGames/ThrackTheFoxPressKit/archive/refs/heads/main.zip)
