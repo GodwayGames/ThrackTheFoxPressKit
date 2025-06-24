@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Webpage</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+        .container {
+            width: 80%;
+            margin: 20px auto;
+        }
+        .row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #fff;
+            padding: 10px 20px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .icon img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+        }
+        .tag {
+            flex: 1;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+        .url a {
+            text-decoration: none;
+            color: #007BFF;
+            font-size: 14px;
+        }
+        .url a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="container"></div>
+	<img src="https://img.itch.zone/aW1nLzE3OTMxMTc2LnBuZw==/32x32%23/I7LrMu.png" >
+    <script>
+        // List of URLs and their descriptions
+        const links = [
+            { url: "https://store.steampowered.com/app/3249500/Thrack_The_Fox/", description: "Steam Page for Thrack The Fox" },
+            { url: "https://x.com/Godway_Games", description: "Twitter" },
+            { url: "https://x.com/TpsgOfficial", description: "Twitter" },			
+            { url: "https://tpsg.itch.io/thrack", description: "Thrack-The-Fox main itch page (Including itch.io devlogs)",favicon: "https://img.itch.zone/aW1nLzE3OTMxMTc2LnBuZw==/32x32%23/I7LrMu.png" },
+            { url: "https://www.trentpattersonstudiogaming.com/thrack.html", description: "Thrack-The-Fox.com (http://thrackthefox.com/)" },
+            { url: "https://indiegamenews.github.io/IndieGameNews/?Page=1", description: "Indie Game News", favicon: "https://indiegamenews.github.io/IndieGameNews/favicon.ico" },
+            { url: "https://godwaygames.itch.io/", description: "Godway Games Itch Page" },
+			{ url: "https://www.youtube.com/@tpsgofficial", description: "TPSG Youtube" },
+        ];
+
+        // Function to generate a row
+        function createRow(iconUrl, description, url) {
+            const row = document.createElement('div');
+            row.className = 'row';
+
+            row.innerHTML = `
+                <div class="icon">
+                    <img src="${iconUrl}" alt="Favicon">
+                </div>
+                <div class="tag">${description}</div>
+                <div class="url">
+                    <a href="${url}" target="_blank">${url}</a>
+                </div>
+            `;
+            return row;
+        }
+
+        // Function to get the favicon for a given URL
+        function getFavicon(url) {
+            const domain = new URL(url).origin;
+            return `${domain}/favicon.ico`;
+        }
+
+        // Main function to populate the container
+        function populateContainer() {
+            const container = document.getElementById('container');
+            links.forEach(link => {
+				//if(!link.hasOwnProperty('favicon'))
+				if(!link.hasOwnProperty('favicon'))
+					
+					iconUrl = getFavicon(link.url);
+					
+                else
+					
+					iconUrl = link.favicon;
+					
+					
+				const row = createRow(iconUrl, link.description, link.url);
+				container.appendChild(row);
+            });
+        }
+
+        // Populate the container when the page loads
+        document.addEventListener('DOMContentLoaded', populateContainer);
+    </script>
+</body>
+</html>
